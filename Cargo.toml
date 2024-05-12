@@ -2,6 +2,7 @@
 name = "trion-samples"
 edition = "2021"
 publish = false
+exclude = ["/.github/"]
 description = "Sample programs for use with, and testing of, the trion assembler."
 authors = ["KosmosPrime <5663514+KosmosPrime@users.noreply.github.com>"]
 repository = "https://github.com/KosmosPrime/trion"
