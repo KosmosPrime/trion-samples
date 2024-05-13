@@ -9,8 +9,5 @@ repository = "https://github.com/KosmosPrime/trion"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 
-[lib]
-crate-type = []
-
 [dependencies]
 trion = "0.7.1"
