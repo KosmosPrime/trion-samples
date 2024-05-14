@@ -10,7 +10,7 @@ use trion::asm::Context;
 
 macro_rules!gen_tests
 {
-	[$($name:ident => $csum:literal),+ $(,)?] =>
+	[$($name:ident $(@ $base:literal)? $(where $pre_asm:expr)? => $csum:literal),+ $(,)?] =>
 	{
 		$(
 			#[test]
@@ -20,9 +20,14 @@ macro_rules!gen_tests
 				path.push("samples");
 				module_path!().split("::").skip(1).for_each(|m| path.push(m));
 				path.push(concat!(stringify!($name), ".asm"));
-				$crate::run_assembly_test(path, $csum);
+				$crate::run_assembly_test(path, $csum, $crate::gen_tests!(@impl/choice $({$base})? {0}),
+					$crate::gen_tests!(@impl/choice $({$pre_asm})? {|_| {}}));
 			}
 		)+
+	};
+	(@impl/choice {$choice:expr} $($_:tt)*) =>
+	{
+		$choice
 	};
 }
 pub(crate) use gen_tests;
@@ -83,7 +88,7 @@ fn test_crc()
 	assert_eq!(crc32(b" Continue from above.", 0x519025E9), 0x110257EA);
 }
 
-pub fn run_assembly_test(path: PathBuf, expect: u32)
+pub fn run_assembly_test(path: PathBuf, expect: u32, base: u32, pre_asm: fn(&mut Context))
 {
 	let mut buff = Vec::new();
 	let mut file = OpenOptions::new().read(true).open(&path).unwrap();
@@ -92,7 +97,8 @@ pub fn run_assembly_test(path: PathBuf, expect: u32)
 	
 	let directives = DirectiveList::generate();
 	let mut ctx = Context::new(&Arm6M, &directives);
-	ctx.change_segment(0).unwrap();
+	ctx.change_segment(base).unwrap();
+	pre_asm(&mut ctx);
 	let path = ctx.assemble(buff.as_ref(), path).1;
 	assert!(ctx.close_segment().is_ok() && ctx.finalize(), "assembly of {path:?} was unsuccessful");
 	assert!(ctx.output().len() > 0, "assembly of {path:?} produced no output");
