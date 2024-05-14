@@ -92,6 +92,7 @@ pub fn run_assembly_test(path: PathBuf, expect: u32)
 	
 	let directives = DirectiveList::generate();
 	let mut ctx = Context::new(&Arm6M, &directives);
+	ctx.change_segment(0).unwrap();
 	let path = ctx.assemble(buff.as_ref(), path).1;
 	assert!(ctx.close_segment().is_ok() && ctx.finalize(), "assembly of {path:?} was unsuccessful");
 	assert!(ctx.output().len() > 0, "assembly of {path:?} produced no output");
