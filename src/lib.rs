@@ -8,6 +8,8 @@ use trion::arm6m::Arm6M;
 use trion::asm::directive::DirectiveList;
 use trion::asm::Context;
 
+mod rp2040;
+
 macro_rules!gen_tests
 {
 	[$($name:ident $(@ $base:literal)? $(where $pre_asm:expr)? => $csum:literal),+ $(,)?] =>
